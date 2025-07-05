@@ -25,6 +25,10 @@ public class JwtUtils {
     public String generateJwtToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("role", userDetails.getAuthorities().stream()
+                        .map(auth -> auth.getAuthority())
+                        .findFirst()
+                        .orElse("USER"))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(jwtSecret)
