@@ -1,13 +1,11 @@
-FROM openjdk:17-jre-slim
-
-# Set the working directory
+# MVN container
+FROM maven:3-openjdk-17-slim AS builder
+COPY . /app
 WORKDIR /app
+RUN mvn clean install -DskipTests
 
-# Copy the Maven build artifact (JAR file) into the container
-COPY target/serfinsa-backend-service-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the application port
-EXPOSE 8080
-
-# Define the command to run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JAVA container
+FROM openjdk:17-slim
+WORKDIR /app
+COPY --from=builder /app/target/* ./app/
+ENTRYPOINT ["java", "-jar","-Dspring.profiles.active=dev","./app/serfinsa-backend-service.jar"]
